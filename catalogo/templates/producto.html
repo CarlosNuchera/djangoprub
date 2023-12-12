@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    Detalles del producto
+{% endblock %}
+
+{% block contenido %}
+<body>
+    <div class="container">
+        <h2 class="text-center" style="margin-top: 25px;">DETALLES DEL PRODUCTO</h1>
+        <hr>
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-4"> 
+                    <div class="card" style="padding-left: 0; padding-right: 0; max-width: 480px;">
+                        {% if producto.imagen %}
+                        <div class="mx-auto img-fluid"
+                            style="height: 250px; background-image: url({% static 'media/productos/' %}{{ producto.imagen }}); background-size: cover; width: 100%; background-position: center;">
+                        </div>
+                        {% endif %}
+                        <div>
+                            <div class="card-body">
+                                <h3 class="card-title">{{ producto.nombre }}</h3>
+                                <p class="card-text">{{ producto.descripcion }}</p>
+                                <p class="card-text">{{ producto.precio }}€</p>
+                                <span class="badge bg-secondary">{{ producto.departamento }}</span>
+                                <span class="badge bg-secondary">{{ producto.fabricante }}</span>
+                                <span class="badge bg-secondary">{{ producto.tipo_seccion }}</span>
+                                {% if producto.stock > 0 %}
+                                <form method="POST" action="{% url 'agregar_al_carrito' %}" class="text-center mt-3">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                    <input type="number" name="cantidad" value="{% if item.cantidad %}{{ item.cantidad }}{% else %}1{% endif %}" min="1" max="{{producto.stock}}">
+                                    <button type="submit" class="btn btn-warning">Agregar al Carrito</button>
+                                </form>
+                                {%else%}
+                                    <span class="badge rounded-pill bg-danger" style="font-size: medium;">Sin stock</span> 
+                                {%endif%}
+                            </div>
+                        </div>
+                    </div>
+            </div>
+     
+            <div class="col-1"></div>
+            <div class="col-4 d-flex flex-column justify-content-start"> 
+                <h4>Opiniones:</h4>
+                {% if opiniones %}
+                    <div>
+                        {% for opinion in opiniones %}
+                        <ul>
+                            <li>{{ opinion.usuario.username }} dijo: {{ opinion.comentario }}</li>
+                        </ul>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No hay opiniones para este producto todavía.</p>
+                {% endif %}
+
+                {% if user.is_authenticated %}
+                    <div>
+                        <h4>Añadir Opinión:</h4>
+                        {% if messages %}
+                            <div class="alert alert-danger">
+                                {% for message in messages %}
+                                    {{ message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <form method="POST" action="{% url 'agregar_opinion' %}">
+                            {% csrf_token %}
+                            <textarea name="comentario" rows="4" cols="50" placeholder="Escribe tu opinión aquí..."></textarea>
+                            <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                            <button type="submit" class="btn btn-primary mt-2">Enviar Opinión</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <p>Inicia sesión para dejar una opinión.</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>   
+</body>
+{% endblock %}
+</html>
